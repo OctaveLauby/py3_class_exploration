@@ -8,19 +8,13 @@ Child1          Child2
        GrandChild
 """
 
-
-# ----
+# --------------------------------------------------------------------------- #
+# ---- All inits are overwritten
 
 class Parent(object):
     def __init__(self):
         print("Parent")
         self.content = "parent"
-
-
-class Child0(Parent):
-    def __init__(self):
-        print("Child0")
-        super().__init__()
 
 
 class Child1(Parent):
@@ -37,38 +31,122 @@ class Child2(Parent):
         self.content = "child2"
 
 
-class GrandChild00(Child0, Child1):
+class GrandChild(Child1, Child2):
     def __init__(self):
-        print("GrandChild00")
+        print("GrandChild")
         super().__init__()
-
-
-class GrandChild0(Child1, Child2):
-    def __init__(self):
-        print("GrandChild0")
-        super().__init__()
-
-
-class GrandChild1(Child1, Child2):
-    def __init__(self):
-        print("GrandChild1")
-        super().__init__()
-        self.content = "grandchild1"
+        self.content = "grandchild"
 
 
 if __name__ == '__main__':
 
-    print("\nBuilding GrandChild00 object:")
-    assert GrandChild00.mro() == [GrandChild00, Child0, Child1, Parent, object]
-    grandchild00 = GrandChild00()
-    assert grandchild00.content == "child1"
+    print("\nBuilding GrandChild object:")
+    assert GrandChild.mro() == [GrandChild, Child1, Child2, Parent, object]
+    instance = GrandChild()
+    assert instance.content == "grandchild"
 
-    print("\nBuilding GrandChild0 object:")
-    assert GrandChild0.mro() == [GrandChild0, Child1, Child2, Parent, object]
-    grandchild0 = GrandChild0()
-    assert grandchild0.content == "child1"
 
-    print("\nBuilding GrandChild1 object:")
-    assert GrandChild1.mro() == [GrandChild1, Child1, Child2, Parent, object]
-    grandchild1 = GrandChild1()
-    assert grandchild1.content == "grandchild1"
+# --------------------------------------------------------------------------- #
+# ---- GrandChild init not overwritten
+
+class Parent(object):
+    def __init__(self):
+        self.content = "parent"
+
+
+class Child1(Parent):
+    def __init__(self):
+        super().__init__()
+        self.content = "child1"
+
+
+class Child2(Parent):
+    def __init__(self):
+        super().__init__()
+        self.content = "child2"
+
+
+class GrandChild(Child1, Child2):
+    def __init__(self):
+        print("GrandChild")
+        super().__init__()
+
+
+if __name__ == '__main__':
+    instance = GrandChild()
+    assert instance.content == "child1"
+
+
+# --------------------------------------------------------------------------- #
+# ---- Child init args != from parent init args
+
+# -- Issue :
+
+class Parent(object):
+    def __init__(self, n):
+        self.n = n
+        self.content = "parent"
+
+
+class Child1(Parent):
+    def __init__(self):
+        super().__init__(n=1)
+        self.content = "child1"
+
+
+class Child2(Parent):
+    def __init__(self):
+        super().__init__(n=2)
+        self.content = "child2"
+
+
+class GrandChild(Child1, Child2):
+    def __init__(self):
+        super().__init__()
+        self.content = "grandchild"
+
+
+if __name__ == '__main__':
+    try:
+        instance = GrandChild()
+    except TypeError:
+        pass
+    else:
+        raise Exception("Should have failed")
+
+
+# -- Solution :
+
+class Parent(object):
+    def __init__(self, n):
+        self.n = n
+        self.content = "parent"
+
+
+class Child1(Parent):
+    def __init__(self):
+        Parent.__init__(self, n=1)
+        self.content = "child1"
+        self.is_child1 = True
+
+
+class Child2(Parent):
+    def __init__(self):
+        Parent.__init__(self, n=2)
+        self.content = "child2"
+        self.is_child2 = True
+
+
+class GrandChild(Child1, Child2):
+    def __init__(self):
+        Child2.__init__(self)
+        Child1.__init__(self)
+        self.content = "grandchild"
+
+
+if __name__ == '__main__':
+    instance = GrandChild()
+    assert instance.content == "grandchild"
+    assert instance.n == 1
+    assert instance.is_child1
+    assert instance.is_child2
