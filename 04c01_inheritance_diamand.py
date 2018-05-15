@@ -116,6 +116,12 @@ if __name__ == '__main__':
 
 
 # -- Solution :
+# method :not using supe
+# benefits :
+#     - light syntax
+#     - good and clear control on arguments
+# objections :
+#     - Parent __init__ is called twice
 
 class Parent(object):
     def __init__(self, n):
@@ -139,14 +145,58 @@ class Child2(Parent):
 
 class GrandChild(Child1, Child2):
     def __init__(self):
-        Child2.__init__(self)
         Child1.__init__(self)
+        Child2.__init__(self)
         self.content = "grandchild"
 
 
 if __name__ == '__main__':
     instance = GrandChild()
     assert instance.content == "grandchild"
-    assert instance.n == 1
+    assert instance.n == 2
+    assert instance.is_child1
+    assert instance.is_child2
+
+
+# -- Solution :
+# method : using super
+# benefits :
+#     - parent __init__ called once
+# objections :
+#     - Unclear use of *args and **kwargs
+#       > (someone not knowing diamand inheritance won't understand)
+#     - risk of untracked error (wrong args used when calling childs)
+
+
+class Parent(object):
+    def __init__(self, n):
+        self.n = n
+        self.content = "parent"
+
+
+class Child1(Parent):
+    def __init__(self, *args, **kwargs):
+        super().__init__(n=1)
+        self.content = "child1"
+        self.is_child1 = True
+
+
+class Child2(Parent):
+    def __init__(self, *args, **kwargs):
+        super().__init__(n=2)
+        self.content = "child2"
+        self.is_child2 = True
+
+
+class GrandChild(Child1, Child2):
+    def __init__(self):
+        super().__init__()
+        self.content = "grandchild"
+
+
+if __name__ == '__main__':
+    instance = GrandChild()
+    assert instance.content == "grandchild"
+    assert instance.n == 2
     assert instance.is_child1
     assert instance.is_child2
