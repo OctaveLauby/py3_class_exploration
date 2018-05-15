@@ -59,16 +59,16 @@ class GrandChild1(Child1, Child2):
 if __name__ == '__main__':
 
     print("\nBuilding GrandChild00 object:")
-    print("> %s" % GrandChild00.mro())
+    assert GrandChild00.mro() == [GrandChild00, Child0, Child1, Parent, object]
     grandchild00 = GrandChild00()
     assert grandchild00.content == "child1"
 
     print("\nBuilding GrandChild0 object:")
-    print("> %s" % GrandChild0.mro())
+    assert GrandChild0.mro() == [GrandChild0, Child1, Child2, Parent, object]
     grandchild0 = GrandChild0()
     assert grandchild0.content == "child1"
 
     print("\nBuilding GrandChild1 object:")
-    print("> %s" % GrandChild1.mro())
+    assert GrandChild1.mro() == [GrandChild1, Child1, Child2, Parent, object]
     grandchild1 = GrandChild1()
     assert grandchild1.content == "grandchild1"
