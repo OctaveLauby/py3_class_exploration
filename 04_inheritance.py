@@ -42,6 +42,7 @@ class Robot(Talker):
 
 
 if __name__ == "__main__":
+    print("Robot MRO : %s" % Robot.mro())
     talker = Talker()
     person = Person("Mike")
     robot = Robot("m1r0b0t")
